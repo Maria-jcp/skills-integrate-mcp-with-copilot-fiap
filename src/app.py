@@ -19,8 +19,32 @@ current_dir = Path(__file__).parent
 app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
 
+ideas = []  # In-memory storage for ideas
+
 # In-memory activity database
 activities = {
+@app.get("/ideas")
+def get_ideas():
+    """Return all saved ideas"""
+    return {"ideas": ideas}
+
+
+@app.post("/ideas")
+def add_idea(idea: str):
+    """Add a new idea"""
+    if not idea or idea.strip() == "":
+        raise HTTPException(status_code=400, detail="Idea cannot be empty")
+    ideas.append(idea)
+    return {"message": "Idea added", "idea": idea}
+
+
+@app.delete("/ideas")
+def delete_idea(idea: str):
+    """Delete an idea"""
+    if idea not in ideas:
+        raise HTTPException(status_code=404, detail="Idea not found")
+    ideas.remove(idea)
+    return {"message": "Idea deleted", "idea": idea}
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
